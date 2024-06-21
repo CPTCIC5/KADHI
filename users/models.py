@@ -1,13 +1,40 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
+from django_countries.fields import CountryField
 from django.core.validators import validate_image_file_extension
+
+from .managers import CustomUserManager
+
 from random import randint
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 
 
+class User(AbstractUser):
+    username = None
+    email = models.EmailField(("email address"), unique=True)
+    newsletter = models.BooleanField(default=True, help_text="Do you want to receive the newsletter?")
 
-# Create your models here.
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def clean(self):
+        super().clean()
+        self.email = self.email.lower()
+
+    def save(self, *args, **kwargs):
+        is_created = self._state.adding
+        self.clean()  # Ensure the email is normalized
+        
+        super().save(*args, **kwargs)
+
+        if is_created:
+            Profile.objects.create(user=self)
+
+    def __str__(self):
+        return self.email
+
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(
@@ -37,26 +64,30 @@ class Profile(models.Model):
             self.referral_code = referal_codee
         super().save(*args, **kwargs)
 
-    @receiver(post_save, sender=User)
-    def create_user_profile(sender, instance, created, **kwargs):
-        if created:
-            Profile.objects.create(user=instance)
-
-    @receiver(post_save, sender=User)
-    def save_user_profile(sender, instance, **kwargs):
-        instance.profile.save()
-
     def __str__(self):
         return str(self.user)
-    
+
+"""
+
+FEEDBACK_CATEGORIES = (
+    ("General", "General"),
+    ("Technical", "Technical"),
+    ("To improve", "To improve"),
+    ("Feedback", "Feedback"),
+    ("Others", "Others"),
+)
+"""
+
+URGENCYY = ((1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9))
+
+
 class Feedback(models.Model):
-    user = models.ForeignKey(User,on_delete=models.CASCADE,default=1)
-    title=models.CharField(max_length=100)
-    desc=models.TextField()
-    posted_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    urgency = models.IntegerField(choices=URGENCYY)
+    subject = models.CharField(max_length=30)
+    message = models.TextField()
+    emoji = models.CharField(max_length=50,blank=True, null=True)
+    attachment = models.ImageField(upload_to='Platform-Feedbacks/',validators=[validate_image_file_extension],blank=True,null=True)
 
     def __str__(self):
-        return self.title
-    
-    class Meta:
-        ordering = ['-posted_at']
+        return self.user.email

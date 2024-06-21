@@ -15,23 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth import views as auth_views
-
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('users.urls')),
-    path('chat/', include('aichat.urls')),
-    path('password-reset/',auth_views.PasswordResetView.as_view(template_name='password_reset.html'),name='password_reset'),
-    path('password-reset/done/',auth_views.PasswordResetDoneView.as_view(),name='password_reset_done'),
-    path('password-reset-confirm/<uidb64>/<token>/',auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'),name='password_reset_confirm'),
-    path('password-reset-complete/',auth_views.PasswordResetCompleteView.as_view(),name='password_reset_complete'),
+    path("admin/", admin.site.urls),
+    path('admin_tools_stats/', include('admin_tools_stats.urls')),
+    path("__debug__/", include("debug_toolbar.urls")),
+    path("api/auth/", include("users.urls")),
+    path('api/auth/password_reset/', include('django_rest_passwordreset.urls', namespace='password_reset')),
+    path("", include("allauth.urls")),
+    path("api/workspaces/", include("workspaces.urls")),
+    path("api/channels/", include('channels.urls')),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
-
-urlpatterns += static(settings.MEDIA_URL,
-document_root=settings.MEDIA_ROOT)
-
-handler404 = "backend.views.page_not_found_view"
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
