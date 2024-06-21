@@ -36,14 +36,26 @@ ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'django_nvd3',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "rest_framework",
+    "django_rest_passwordreset",
     'users',
     'workspaces',
-    'channels'
+    'channels',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'django.contrib.sites',
+    'allauth.socialaccount.providers.google',
+    'django_admin_logs',
+    "debug_toolbar",
+    "corsheaders",
+
 ]
 DJANGO_ADMIN_LOGS_DELETABLE = False
 DJANGO_ADMIN_LOGS_ENABLED = True
