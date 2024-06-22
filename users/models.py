@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django_countries.fields import CountryField
 from django.core.validators import validate_image_file_extension
 
 from .managers import CustomUserManager
